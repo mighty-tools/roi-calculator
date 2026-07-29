@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mighty Pro ROI Calculator</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Inter+Tight:wght@500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 28px; max-width: 860px; margin: 0 auto; }
+h1 { font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 600; color: #092B2E; margin-bottom: 1.5rem; }
+.subtitle { font-size: 13px; color: #6b6b6b; margin-bottom: 1.5rem; font-family: 'Inter', sans-serif; }
+.step-nav { display: flex; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; margin-bottom: 1.75rem; }
+.snav { flex: 1; padding: 10px 4px; font-size: 12px; color: #565656; background: #f7f7f7; border: none; border-right: 1px solid #e5e5e5; cursor: pointer; text-align: center; line-height: 1.4; }
+.snav:last-child { border-right: none; }
+.snav.active { background: #fff; color: #1a1a1a; font-weight: 500; }
+.snav .sn { display: block; font-size: 11px; color: #6b6b6b; margin-bottom: 1px; }
+.snav.active .sn { color: #565656; }
+.panel { display: none; }
+.panel.active { display: block; }
+.sec-label { font-family: 'Inter Tight', sans-serif; font-size: 11px; font-weight: 600; color: #6b6b6b; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+.fl { font-size: 13px; color: #555; margin-bottom: 5px; display: block; }
+.hint { font-size: 12px; color: #6b6b6b; margin-top: 3px; line-height: 1.4; }
+.frow { margin-bottom: 1rem; }
+input[type=number], input[type=text], select { width: 100%; height: 38px; padding: 0 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 7px; background: #fff; color: #1a1a1a; outline: none; }
+input:focus, select:focus { border-color: #00D0AD; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+.mcard { background: #f7f7f7; border-radius: 7px; padding: 10px; }
+.mcard .ml { font-size: 11px; color: #6b6b6b; margin-bottom: 3px; }
+.mcard .mv { font-size: 20px; font-weight: 500; color: #1a1a1a; }
+.mcard.accent .ml { color: #00D0AD; }
+.mcard.accent .mv { color: #00D0AD; }
+hr { border: none; border-top: 1px solid #f0f0f0; margin: 1.25rem 0; }
+.nav-btns { display: flex; gap: 8px; margin-top: 1.5rem; }
+.btn-p { flex: 1; height: 40px; background: #fff; border: 1px solid #ddd; border-radius: 7px; font-size: 14px; font-weight: 500; color: #1a1a1a; cursor: pointer; }
+.btn-p:hover { background: #f7f7f7; }
+.btn-s { height: 40px; padding: 0 14px; background: transparent; border: 1px solid #eee; border-radius: 7px; font-size: 14px; color: #565656; cursor: pointer; }
+.btn-s:hover { background: #f7f7f7; }
+.btn-export { width: 100%; height: 40px; background: #00D0AD; border: none; border-radius: 7px; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; margin-top: 1rem; }
+.btn-export:hover { background: #00b89a; }
+.social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.ch-table { width: 100%; border-collapse: collapse; margin-bottom: .75rem; }
+.ch-table th { font-size: 11px; color: #6b6b6b; text-align: left; padding: 4px 6px; border-bottom: 1px solid #f0f0f0; }
+.ch-table td { padding: 5px 4px; border-bottom: 1px solid #f0f0f0; }
+.ch-table tr:last-child td { border-bottom: none; }
+.ch-table input { height: 32px; font-size: 13px; }
+.ch-name { font-size: 13px; color: #555; padding-left: 2px; }
+.num-cell { font-size: 13px; font-weight: 500; color: #1a1a1a; text-align: right; padding-right: 4px; }
+.blue { color: #00D0AD; }
+.offer-toggle-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+.offer-toggle { border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px; cursor: pointer; transition: border .15s, opacity .15s; }
+.offer-toggle.on { border: 2px solid #00D0AD; }
+.offer-toggle.off { opacity: .5; }
+.ot-label { font-size: 11px; color: #6b6b6b; margin-bottom: 4px; }
+.ot-name { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 6px; }
+.ot-badge { display: inline-block; padding: 2px 7px; font-size: 11px; border-radius: 6px; background: #e0faf5; color: #00D0AD; }
+.ot-off-badge { display: inline-block; padding: 2px 7px; font-size: 11px; border-radius: 6px; background: #f0f0f0; color: #6b6b6b; border: 1px solid #e5e5e5; }
+.offer-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+.otab { padding: 7px 13px; font-size: 13px; border: 1px solid #e5e5e5; border-radius: 7px; cursor: pointer; background: transparent; color: #565656; }
+.otab.active { background: #f7f7f7; color: #1a1a1a; border-color: #ddd; font-weight: 500; }
+.otab.dimmed { opacity: .35; pointer-events: none; }
+.opanel { display: none; }
+.opanel.active { display: block; }
+.callout { border-left: 2px solid #00D0AD; padding: 10px 12px; font-size: 13px; color: #555; line-height: 1.5; margin: 1rem 0; background: #f0fdf9; }
+.warn { padding: 10px 12px; font-size: 13px; color: #b45309; line-height: 1.5; margin: .75rem 0; background: #fffbeb; border-radius: 7px; }
+.off-msg { font-size: 13px; color: #6b6b6b; padding: 1rem 0; }
+.sum-block { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1.25rem; background: #fff; margin-bottom: 1rem; }
+.rev-big { text-align: center; padding: 1rem 0; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; margin-bottom: 1rem; }
+.rbl { font-size: 12px; color: #6b6b6b; margin-bottom: 4px; }
+.rbv { font-size: 44px; font-weight: 500; color: #1a1a1a; }
+.rbs { font-size: 12px; color: #565656; margin-top: 4px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; font-weight: 500; color: #565656; padding: 5px 6px; border-bottom: 1px solid #f0f0f0; }
+.tbl td { padding: 6px 6px; color: #1a1a1a; border-bottom: 1px solid #f0f0f0; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl .num { text-align: right; }
+.tbl .tot { font-weight: 500; }
+.scen-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 1rem; }
+.scen-item { background: #f7f7f7; border-radius: 7px; padding: 10px; text-align: center; }
+.scen-item .sl { font-size: 11px; color: #6b6b6b; margin-bottom: 4px; }
+.scen-item .sv { font-size: 17px; font-weight: 500; color: #1a1a1a; }
+.chart-wrap { position: relative; width: 100%; height: 160px; margin-bottom: 1rem; }
+.profit-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.profit-row:last-child { border-bottom: none; }
+.profit-label { font-size: 13px; color: #565656; }
+.profit-val { font-size: 14px; font-weight: 500; }
+.profit-val.pos { color: #15803d; }
+.profit-val.neg { color: #dc2626; }
+.profit-val.neu { color: #1a1a1a; }
+.exp-row { display: grid; grid-template-columns: 1fr 130px 28px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.btn-rm { height: 28px; width: 28px; background: transparent; border: 1px solid #e5e5e5; border-radius: 7px; cursor: pointer; color: #6b6b6b; font-size: 14px; }
+.btn-rm:hover { background: #f7f7f7; }
+.btn-add { height: 32px; padding: 0 13px; font-size: 13px; background: transparent; border: 1px solid #e5e5e5; border-radius: 7px; cursor: pointer; color: #565656; margin-bottom: 1rem; }
+.btn-add:hover { background: #f7f7f7; }
+.email-block { margin-bottom: 1.25rem; }
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.toggle-label { font-size: 13px; color: #555; }
+.toggle-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #ddd; border-radius: 20px; transition: .2s; }
+.toggle-slider:before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+.toggle-switch input:checked + .toggle-slider { background: #00D0AD; }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(16px); }
+.nl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+
+<div style="margin-bottom: 16px;">
+  <svg width="90" height="27" viewBox="0 0 269 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 62.0305H13.7941V40.1138C13.7941 32.0717 16.7693 29.6856 21.187 29.6856C25.4244 29.6856 27.5882 32.0717 27.5882 37.9928V62.0305H41.4725V40.1138C41.4725 32.0717 44.4477 29.6856 48.7753 29.6856C53.0127 29.6856 55.2665 32.1601 55.2665 38.0812V62.0305H69.1508V35.6067C69.1508 26.6809 66.1757 18.2854 53.7339 18.2854C47.3328 18.2854 42.1937 21.5552 39.8497 26.1507C37.9563 21.6436 33.9894 18.2854 26.2359 18.2854C20.1953 18.2854 15.6874 21.3785 13.7941 25.6204V19.4343H0V62.0305Z" fill="#092B2E"/>
+    <path d="M81.5569 16.5259C86.5156 16.5259 90.1219 12.8142 90.1219 8.30716C90.1219 3.71171 86.5156 0 81.5569 0C76.5982 0 73.0821 3.71171 73.0821 8.30716C73.0821 12.8142 76.5982 16.5259 81.5569 16.5259ZM74.705 62.0305H88.4089V21.041H74.705V62.0305Z" fill="#092B2E"/>
+    <path d="M126.892 19.4343V25.5321C124.728 21.1134 119.409 18.2854 113.459 18.2854C100.927 18.2854 92.6321 27.7414 92.6321 40.2905C92.6321 52.8396 100.386 62.0305 113.278 62.0305C118.958 62.0305 124.728 59.3793 126.892 55.1374V60.7933C126.892 68.3935 123.015 71.1331 116.614 71.1331C111.024 71.1331 108.049 69.1005 107.418 65.7422H93.3533C93.5337 70.3377 96.6892 74.9332 101.107 77.5844C105.344 80.0588 110.573 81.0309 116.794 81.0309C123.015 81.0309 128.334 79.9705 132.301 77.2309C137.621 73.6075 140.596 67.5097 140.686 59.2909V19.4343H126.892ZM117.065 51.6024C110.844 51.6024 106.787 46.9186 106.787 40.4673C106.787 34.016 110.844 29.3321 117.065 29.3321C123.646 29.3321 127.523 34.2811 127.523 40.4673C127.523 46.6535 123.646 51.6024 117.065 51.6024Z" fill="#092B2E"/>
+    <path d="M174.169 18.2854C167.588 18.2854 162.629 20.8482 160.105 25.6204V0.168712H146.311V62.0305H160.105V39.7603C160.105 33.2206 162.99 29.6856 168.489 29.6856C174.079 29.6856 176.153 32.9555 176.153 40.1138V62.0305H190.037V35.6951C190.037 24.1181 184.718 18.2854 174.169 18.2854Z" fill="#092B2E"/>
+    <path d="M215.465 51.514C212.039 51.514 209.424 50.5419 209.424 44.2674V30.1275H220.243V19.4343H209.424V6.79677H195.63V47.0953C195.63 61.3235 204.556 62.7375 211.047 62.7375C215.998 62.7375 221.473 61.428 224.546 60.4559C224.546 60.4559 222.935 57.4431 222.32 55.8363C221.706 54.2295 220.858 51.2168 220.858 51.2168C219.596 51.3935 216.997 51.514 215.465 51.514Z" fill="#092B2E"/>
+    <path d="M255.097 19.4343V40.5556C255.097 47.0953 252.302 51.3373 246.712 51.3373C240.942 51.3373 239.049 47.6256 239.049 42.1464V19.4343H225.255V44.179C225.255 54.7839 230.213 62.0305 241.303 62.0305C247.884 62.0305 252.663 59.4677 255.097 54.9606V61.5887C255.097 68.2167 251.761 71.1331 246.712 71.1331C241.483 71.1331 239.41 69.0121 239.139 65.3887H225.255C225.345 69.9842 227.509 73.961 230.664 76.6123C234.271 79.5286 239.319 81.0309 246.712 81.0309C254.015 81.0309 258.793 79.3518 262.67 76.082C266.367 72.8122 268.891 67.5981 268.891 60.7049V19.4343H255.097Z" fill="#092B2E"/>
+  </svg>
+</div>
+<h1>ROI Calculator</h1>
+
+<div class="step-nav">
+  <button class="snav active" onclick="goTo(0)" id="sn0"><span class="sn">Step 1</span>Audience</button>
+  <button class="snav" onclick="goTo(1)" id="sn1"><span class="sn">Step 2</span>Offers</button>
+  <button class="snav" onclick="goTo(2)" id="sn2"><span class="sn">Step 3</span>Expenses</button>
+  <button class="snav" onclick="goTo(3)" id="sn3"><span class="sn">Step 4</span>Summary</button>
+</div>
+
+<!-- STEP 1: AUDIENCE -->
+<div class="panel active" id="p0">
+  <div class="frow">
+    <label class="fl">Network Name</label>
+    <input type="text" id="hostName" placeholder="" oninput="calc()">
+  </div>
+  <hr>
+  <div class="email-block">
+    <div class="sec-label">Email List</div>
+    <div class="frow">
+      <label class="fl">Total Subscribers</label>
+      <input type="text" inputmode="numeric" class="n-fmt" id="emailSize" value="0" oninput="calc()">
+    </div>
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" id="hasNewsletter" onchange="toggleNewsletter(); calc();">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">This list gets an active newsletter</span>
+    </div>
+    <div id="newsletter-fields" style="display:none;">
+      <div class="nl-grid">
+        <div class="frow" style="margin-bottom:0;">
+          <label class="fl">Avg Open Rate %</label>
+          <input type="number" id="emailOpen" value="30" step="0.1" oninput="calc()">
+          <div class="hint">Typical: 25–45%</div>
+        </div>
+        <div class="frow" style="margin-bottom:0;">
+          <label class="fl">Avg Click Rate %</label>
+          <input type="number" id="emailClick" value="2" step="0.1" oninput="calc()">
+          <div class="hint">Typical: 2–6%</div>
+        </div>
+        <div class="frow" style="margin-bottom:0;">
+          <label class="fl">Clicks per Send</label>
+          <div class="mcard" style="height:34px;display:flex;align-items:center;">
+            <div class="mv" id="emailClicksCalc" style="font-size:14px;">0</div>
+          </div>
+          <div class="hint">Subscribers × open % × click %</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:10px;">People who click are the strongest buyers — their conversion rate is 3–6× higher than the rest of the list.</div>
+    </div>
+    <div id="no-newsletter-hint" class="hint" style="margin-top:4px;">No active newsletter — you can set a conversion % directly from the total list size in Step 2.</div>
+  </div>
+
+  <div class="sec-label">Social Channels</div>
+  <div class="hint" style="margin-bottom:12px;">Just enter follower counts. You'll set conversion % per platform in Step 2.</div>
+  <div class="social-grid" id="social-grid"></div>
+
+  <div class="sec-label">Other Audiences</div>
+  <div class="grid2">
+    <div class="frow">
+      <label class="fl">Existing Customers or Clients</label>
+      <input type="text" inputmode="numeric" class="n-fmt" id="existingSize" value="0" oninput="calc()">
+      <div class="hint">Past buyers, course students, coaching clients.</div>
+    </div>
+    <div class="frow">
+      <label class="fl">Podcast Listeners</label>
+      <input type="text" inputmode="numeric" class="n-fmt" id="podcastSize" value="0" oninput="calc()">
+      <div class="hint">Use monthly downloads as the estimate.</div>
+    </div>
+  </div>
+  <hr>
+  <div class="grid3">
+    <div class="mcard"><div class="ml">Total audience</div><div class="mv" id="totalAud">0</div></div>
+    <div class="mcard"><div class="ml">Active channels</div><div class="mv" id="chCount">0</div></div>
+    <div class="mcard"><div class="ml">Newsletter clicks / send</div><div class="mv" id="totalClicks">—</div></div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-p" onclick="goTo(1)">Next: Offers →</button>
+  </div>
+</div>
+
+<!-- STEP 2: OFFERS -->
+<div class="panel" id="p1">
+  <div class="hint" style="margin-bottom:12px;">Toggle on the offers that apply. At least one must be active.</div>
+  <div class="offer-toggle-grid">
+    <div class="offer-toggle on" id="tog-intro" onclick="toggleOffer('intro')">
+      <div class="ot-label">Offer 1</div>
+      <div class="ot-name">Intro Offer</div>
+      <span id="badge-intro" class="ot-badge">On</span>
+    </div>
+    <div class="offer-toggle on" id="tog-core" onclick="toggleOffer('core')">
+      <div class="ot-label">Offer 2</div>
+      <div class="ot-name">Core Offer</div>
+      <span id="badge-core" class="ot-badge">On</span>
+    </div>
+    <div class="offer-toggle off" id="tog-up" onclick="toggleOffer('up')">
+      <div class="ot-label">Offer 3</div>
+      <div class="ot-name">Level-Up Offer</div>
+      <span id="badge-up" class="ot-off-badge">Off</span>
+    </div>
+  </div>
+  <div id="offer-warn" class="warn" style="display:none;">At least one offer must stay active.</div>
+
+  <div class="offer-tabs">
+    <button class="otab active" id="otab-intro" onclick="switchOffer('intro')">Intro Offer</button>
+    <button class="otab" id="otab-core" onclick="switchOffer('core')">Core Offer</button>
+    <button class="otab dimmed" id="otab-up" onclick="switchOffer('up')">Level-Up Offer</button>
+  </div>
+
+  <!-- INTRO -->
+  <div class="opanel active" id="op-intro">
+    <div id="intro-off-msg" class="off-msg" style="display:none;">This offer is off — toggle it on above to include it in projections.</div>
+    <div id="intro-fields">
+      <div class="frow">
+        <label class="fl">Offer Name</label>
+        <input type="text" id="introName" value="Founding Member Launch" oninput="calc()">
+      </div>
+      <div class="grid2">
+        <div class="frow">
+          <label class="fl">One-Time Price ($)</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="introPrice" value="97" oninput="calc()">
+        </div>
+        <div class="frow">
+          <label class="fl">Member Cap (Leave Blank for No Cap)</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="introCap" placeholder="no cap" data-allow-empty oninput="calc()">
+        </div>
+      </div>
+      <hr>
+      <div class="sec-label">Conversion % by Channel</div>
+      <div class="hint" style="margin-bottom:10px;">What % of each audience do you expect to buy? Adjust to explore scenarios — e.g. "what if 2% of Instagram followers join?"</div>
+      <table class="ch-table">
+        <thead><tr><th>Channel</th><th>Audience size</th><th>Conv % of total</th><th style="text-align:right;padding-right:4px;">Est. members</th></tr></thead>
+        <tbody id="intro-conv-body"></tbody>
+      </table>
+      <div class="grid3" style="margin-top:.75rem;">
+        <div class="mcard"><div class="ml">Total members</div><div class="mv" id="introMembers">0</div></div>
+        <div class="mcard"><div class="ml">One-time price</div><div class="mv" id="introPriceDisp">$97</div></div>
+        <div class="mcard accent"><div class="ml">Intro revenue</div><div class="mv" id="introRevDisp">$0</div></div>
+      </div>
+      <div class="callout">A one-time founding price creates urgency and early cash flow. Typical range: $47–$497. Usually time-limited or capped.</div>
+    </div>
+  </div>
+
+  <!-- CORE -->
+  <div class="opanel" id="op-core">
+    <div id="core-off-msg" class="off-msg" style="display:none;">This offer is off — toggle it on above to include it in projections.</div>
+    <div id="core-fields">
+      <div class="frow">
+        <label class="fl">Offer Name</label>
+        <input type="text" id="coreName" value="Core Membership" oninput="calc()">
+      </div>
+      <div class="grid2">
+        <div class="frow">
+          <label class="fl">Monthly Price ($)</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="coreMonthly" value="48" oninput="calc()">
+        </div>
+        <div class="frow">
+          <label class="fl">Annual Price ($)</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="coreAnnual" value="497" oninput="calc()">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="frow">
+          <label class="fl">Expected Billing Mix</label>
+          <select id="coreBilling" onchange="calc()">
+            <option value="monthly" selected>Mostly monthly</option>
+            <option value="annual">Mostly annual</option>
+            <option value="mixed">Mixed (50/50)</option>
+          </select>
+        </div>
+        <div class="frow">
+          <label class="fl">Effective Annual Value per member</label>
+          <div class="mcard" style="height:34px;display:flex;align-items:center;">
+            <div class="mv" id="coreEffective" style="font-size:14px;">$576</div>
+          </div>
+          <div class="hint">What each member is worth over 12 months at the billing mix above.</div>
+        </div>
+      </div>
+      <hr>
+      <div class="sec-label">Conversion % by Channel</div>
+      <div class="hint" style="margin-bottom:10px;">What % of each audience do you expect to join?</div>
+      <table class="ch-table">
+        <thead><tr><th>Channel</th><th>Audience size</th><th>Conv % of total</th><th style="text-align:right;padding-right:4px;">Est. members</th></tr></thead>
+        <tbody id="core-conv-body"></tbody>
+      </table>
+      <div class="grid3" style="margin-top:.75rem;">
+        <div class="mcard"><div class="ml">Total members</div><div class="mv" id="coreMembers">0</div></div>
+        <div class="mcard"><div class="ml">Eff. annual value</div><div class="mv" id="coreEffDisp">$576</div></div>
+        <div class="mcard accent"><div class="ml">Core annual revenue</div><div class="mv" id="coreRevDisp">$0</div></div>
+      </div>
+      <div class="callout">The core offer is the recurring revenue engine. Typical range: $48–$97/mo or $375–$997/yr. A 30–40% annual discount from monthly encourages members to pay upfront.</div>
+    </div>
+  </div>
+
+  <!-- LEVEL-UP -->
+  <div class="opanel" id="op-up">
+    <div id="up-off-msg" class="off-msg" style="display:none;">This offer is off — toggle it on above to include it in projections.</div>
+    <div id="up-fields">
+      <div class="frow">
+        <label class="fl">Offer Name</label>
+        <input type="text" id="upName" value="VIP / Mastermind" oninput="calc()">
+      </div>
+      <div class="grid2">
+        <div class="frow">
+          <label class="fl">Annual Price ($)</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="upPrice" value="1,997" oninput="calc()">
+        </div>
+        <div class="frow">
+          <label class="fl">Number of members</label>
+          <input type="text" inputmode="numeric" class="n-fmt" id="upMembers" value="0" oninput="calc()">
+          <div class="hint">Usually sold to existing core members — enter an expected headcount directly.</div>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:.5rem;">
+        <div class="mcard"><div class="ml">Total members</div><div class="mv" id="upMembersDisp">0</div></div>
+        <div class="mcard accent"><div class="ml">Level-up revenue</div><div class="mv" id="upRevDisp">$0</div></div>
+      </div>
+      <div class="callout">A premium tier sold to existing members — coaching access, mastermind, cohort. Even 5–10 members at $1,997–$5,000/yr can materially shift your totals.</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-s" onclick="goTo(0)">← Back</button>
+    <button class="btn-p" onclick="goTo(2)">Next: Expenses →</button>
+  </div>
+</div>
+
+<!-- STEP 3: EXPENSES -->
+<div class="panel" id="p2">
+  <div class="hint" style="margin-bottom:1.25rem;">These are subtracted from gross revenue to calculate net profit and ROI.</div>
+  <div class="sec-label">Mighty Pro</div>
+  <div class="grid2" style="margin-bottom:1.25rem;">
+    <div class="frow">
+      <label class="fl">Mighty Pro Annual Cost ($)</label>
+      <input type="text" inputmode="numeric" class="n-fmt" id="mightyCost" value="0" oninput="calc()">
+    </div>
+    <div class="frow">
+      <label class="fl">Transaction Fee %</label>
+      <input type="number" id="txFee" value="0.5" step="0.1" oninput="calc()">
+    </div>
+  </div>
+  <hr>
+  <div class="sec-label" style="margin-bottom:8px;">Additional Expenses <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(optional — team, ads, tools, etc.)</span></div>
+  <div id="exp-rows"></div>
+  <button class="btn-add" onclick="addExpense()">+ Add Expense</button>
+  <hr>
+  <div class="grid4">
+    <div class="mcard"><div class="ml">Mighty Pro cost</div><div class="mv" id="mightyCostDisp">$20,000</div></div>
+    <div class="mcard"><div class="ml">Transaction fees (est.)</div><div class="mv" id="txFeeDisp">$0</div></div>
+    <div class="mcard"><div class="ml">Other expenses</div><div class="mv" id="otherExpDisp">$0</div></div>
+    <div class="mcard"><div class="ml">Total expenses</div><div class="mv" id="totalExpDisp">$20,000</div></div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-s" onclick="goTo(1)">← Back</button>
+    <button class="btn-p" onclick="goTo(3)">View Summary →</button>
+  </div>
+</div>
+
+<!-- STEP 4: SUMMARY -->
+<div class="panel" id="p3">
+  <div class="sum-block">
+    <div style="font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:4px;" id="sumTitle">Revenue Projections</div>
+    <div style="font-size:11px;color:#6b6b6b;margin-bottom:1rem;" id="sumSub">—</div>
+    <div class="rev-big">
+      <div class="rbl">Gross revenue</div>
+      <div class="rbv" id="grossRev">$0</div>
+      <div class="rbs" id="grossSub">—</div>
+    </div>
+    <div class="sec-label" style="margin-bottom:8px;">Revenue by Offer</div>
+    <table class="tbl" style="margin-bottom:1.25rem;">
+      <thead><tr><th>Offer</th><th class="num">Members</th><th class="num">Price</th><th class="num">Annual total</th></tr></thead>
+      <tbody id="sum-tbody"></tbody>
+    </table>
+    <div class="sec-label" style="margin-bottom:8px;">Profitability</div>
+    <div class="profit-row"><span class="profit-label">Gross revenue</span><span class="profit-val neu" id="pr-gross">$0</span></div>
+    <div class="profit-row"><span class="profit-label">Total expenses</span><span class="profit-val neg" id="pr-exp">−$0</span></div>
+    <div class="profit-row" style="border-bottom:none;"><span class="profit-label" style="font-weight:500;">Net profit</span><span class="profit-val" id="pr-net">$0</span></div>
+    <div style="display:flex;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0;">
+      <div><div style="font-size:10px;color:#6b6b6b;">ROI</div><div style="font-size:15px;font-weight:500;" id="pr-roi">—</div></div>
+      <div><div style="font-size:10px;color:#6b6b6b;">Margin</div><div style="font-size:15px;font-weight:500;" id="pr-margin">—</div></div>
+      <div><div style="font-size:10px;color:#6b6b6b;">Avg monthly gross</div><div style="font-size:15px;font-weight:500;" id="pr-monthly">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-bottom:8px;">Scenarios</div>
+  <div class="scen-grid">
+    <div class="scen-item"><div class="sl">Conservative (50%)</div><div class="sv" id="sc-lo">$0</div><div class="sl" id="sc-lo-p" style="margin-top:3px;"></div></div>
+    <div class="scen-item" style="border:1px solid #ddd;"><div class="sl">Base projection</div><div class="sv" id="sc-mi">$0</div><div class="sl" id="sc-mi-p" style="margin-top:3px;"></div></div>
+    <div class="scen-item"><div class="sl">Optimistic (150%)</div><div class="sv" id="sc-hi">$0</div><div class="sl" id="sc-hi-p" style="margin-top:3px;"></div></div>
+  </div>
+
+  <div class="chart-wrap"><canvas id="revChart"></canvas></div>
+  <div class="callout" id="sum-insight">Complete steps 1–3 to see a personalized insight here.</div>
+  <button class="btn-export" onclick="exportSummary()">Download Summary as PDF ↓</button>
+  <div class="nav-btns" style="margin-top:8px;">
+    <button class="btn-s" onclick="goTo(2)">← Back</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+
+// Comma-formatted integer inputs
+function fmtInput(el) {
+  var pos = el.selectionStart;
+  var raw = el.value.replace(/[^\d]/g, '');
+  var digitsBefore = el.value.slice(0, pos).replace(/[^\d]/g, '').length;
+  el.value = raw ? (+raw).toLocaleString('en-US') : '';
+  var count = 0, newPos = 0;
+  for (var i = 0; i < el.value.length; i++) {
+    if (/\d/.test(el.value[i])) { count++; if (count === digitsBefore) { newPos = i + 1; break; } }
+  }
+  if (digitsBefore === 0) newPos = 0;
+  try { el.setSelectionRange(newPos, newPos); } catch(x) {}
+}
+document.addEventListener('input', function(e) {
+  if (e.target.classList && e.target.classList.contains('n-fmt')) fmtInput(e.target);
+}, true);
+
+// Clear zero on focus, restore zero on blur if empty
+document.addEventListener('focus', function(e) {
+  var el = e.target;
+  var isNum = el.type === 'number';
+  var isFmt = el.classList && el.classList.contains('n-fmt');
+  if ((isNum || isFmt) && el.value === '0') el.value = '';
+}, true);
+document.addEventListener('blur', function(e) {
+  var el = e.target;
+  var isNum = el.type === 'number';
+  var isFmt = el.classList && el.classList.contains('n-fmt');
+  if ((isNum || isFmt) && el.value === '' && !el.dataset.allowEmpty) { el.value = '0'; el.dispatchEvent(new Event('input')); }
+}, true);
+
+var S = {
+  offerOn: { intro: true, core: true, up: false },
+  activeTab: 'intro',
+  social: [
+    { name: 'Instagram',   f: 0 },
+    { name: 'YouTube',     f: 0 },
+    { name: 'TikTok',      f: 0 },
+    { name: 'Facebook',    f: 0 },
+    { name: 'LinkedIn',    f: 0 },
+    { name: 'X / Twitter', f: 0 },
+    { name: 'Pinterest',   f: 0 }
+  ],
+  iConv: { email_clicks: 8, email_cold: 1, instagram: 0.05, youtube: 0.05, tiktok: 0.04, facebook: 0.03, linkedin: 0.04, twitter: 0.02, pinterest: 0.01, existing: 20, podcast: 0.5 },
+  cConv: { email_clicks: 5, email_cold: 0.5, instagram: 0.02, youtube: 0.02, tiktok: 0.02, facebook: 0.01, linkedin: 0.02, twitter: 0.01, pinterest: 0.005, existing: 10, podcast: 0.3 },
+  expenses: []
+};
+
+var rChart = null;
+var SK = ['instagram', 'youtube', 'tiktok', 'facebook', 'linkedin', 'twitter', 'pinterest'];
+var AK = ['email_clicks', 'email_cold', 'instagram', 'youtube', 'tiktok', 'facebook', 'linkedin', 'twitter', 'pinterest', 'existing', 'podcast'];
+var AL = {
+  email_clicks: 'Email — newsletter clicks',
+  email_cold:   'Email list (no newsletter)',
+  instagram:    'Instagram',
+  youtube:      'YouTube',
+  tiktok:       'TikTok',
+  facebook:     'Facebook',
+  linkedin:     'LinkedIn',
+  twitter:      'X / Twitter',
+  pinterest:    'Pinterest',
+  existing:     'Existing customers',
+  podcast:      'Podcast listeners'
+};
+
+function fmt(n)       { return '$' + Math.round(n).toLocaleString(); }
+function fmtN(n)      { return Math.round(n).toLocaleString(); }
+function numVal(id, def) { var el = document.getElementById(id); return el && el.value !== '' ? +(el.value.replace(/,/g, '')) : (def || 0); }
+function strVal(id, def) { var el = document.getElementById(id); return el && el.value ? el.value : (def || ''); }
+function setT(id, v)  { var el = document.getElementById(id); if (el) el.textContent = v; }
+
+function goTo(i) {
+  for (var j = 0; j < 4; j++) {
+    document.getElementById('p'  + j).classList.toggle('active', j === i);
+    document.getElementById('sn' + j).classList.toggle('active', j === i);
+  }
+  if (i === 1) buildConvRows();
+  calc();
+}
+
+function toggleNewsletter() {
+  var on = document.getElementById('hasNewsletter').checked;
+  document.getElementById('newsletter-fields').style.display  = on ? 'block' : 'none';
+  document.getElementById('no-newsletter-hint').style.display = on ? 'none'  : 'block';
+}
+
+function buildSocialGrid() {
+  var h = '';
+  S.social.forEach(function(ch, i) {
+    var disp = ch.f ? ch.f.toLocaleString('en-US') : '0';
+    h += '<div class="frow" style="margin-bottom:0;">'
+       + '<label class="fl">' + ch.name + ' Followers</label>'
+       + '<input type="text" inputmode="numeric" class="n-fmt" value="' + disp + '" placeholder="0"'
+       + ' oninput="S.social[' + i + '].f = +(this.value.replace(/,/g,\'\')); calc();">'
+       + '</div>';
+  });
+  document.getElementById('social-grid').innerHTML = h;
+}
+
+function getAud() {
+  var es    = numVal('emailSize', 0);
+  var hasNL = document.getElementById('hasNewsletter').checked;
+  var op    = numVal('emailOpen', 30) / 100;
+  var cl    = numVal('emailClick', 2) / 100;
+  var clicks = hasNL ? Math.round(es * op * cl) : 0;
+  var m = {
+    email_clicks: clicks,
+    email_cold:   hasNL ? 0 : es,
+    existing:     numVal('existingSize', 0),
+    podcast:      numVal('podcastSize',  0)
+  };
+  S.social.forEach(function(ch, i) { m[SK[i]] = ch.f; });
+  return m;
+}
+
+function buildConvRows() {
+  var a = getAud();
+  var iH = '', cH = '', any = false;
+  AK.forEach(function(k) {
+    var v = a[k] || 0;
+    if (!v) return;
+    any = true;
+    var im = Math.round(v * (S.iConv[k] || 0) / 100);
+    var cm = Math.round(v * (S.cConv[k] || 0) / 100);
+    var row = '<tr><td class="ch-name">' + AL[k] + '</td><td class="num-cell">' + fmtN(v) + '</td>';
+    iH += row + '<td><input type="number" value="' + S.iConv[k] + '" step="0.01"'
+              + ' onchange="S.iConv.' + k + ' = +this.value; calc();" style="height:28px;font-size:12px;"></td>'
+              + '<td class="num-cell" id="ic-' + k + '">' + fmtN(im) + '</td></tr>';
+    cH += row + '<td><input type="number" value="' + S.cConv[k] + '" step="0.01"'
+              + ' onchange="S.cConv.' + k + ' = +this.value; calc();" style="height:28px;font-size:12px;"></td>'
+              + '<td class="num-cell" id="cc-' + k + '">' + fmtN(cm) + '</td></tr>';
+  });
+  var empty = '<tr><td colspan="4" style="font-size:12px;color:#6b6b6b;padding:10px 4px;">No audience entered yet — go back to Step 1 and add your numbers.</td></tr>';
+  var ib = document.getElementById('intro-conv-body');
+  var cb = document.getElementById('core-conv-body');
+  if (ib) ib.innerHTML = any ? iH : empty;
+  if (cb) cb.innerHTML = any ? cH : empty;
+}
+
+function toggleOffer(k) {
+  var ac = Object.keys(S.offerOn).filter(function(x) { return S.offerOn[x]; }).length;
+  if (S.offerOn[k] && ac <= 1) {
+    var w = document.getElementById('offer-warn');
+    w.style.display = 'block';
+    setTimeout(function() { w.style.display = 'none'; }, 2500);
+    return;
+  }
+  S.offerOn[k] = !S.offerOn[k];
+  refreshOfferUI();
+  if (!S.offerOn[k] && S.activeTab === k) {
+    var f = Object.keys(S.offerOn).find(function(x) { return S.offerOn[x]; });
+    if (f) switchOffer(f);
+  }
+  calc();
+}
+
+function refreshOfferUI() {
+  ['intro', 'core', 'up'].forEach(function(k) {
+    var on = S.offerOn[k];
+    document.getElementById('tog-' + k).className = 'offer-toggle ' + (on ? 'on' : 'off');
+    var b = document.getElementById('badge-' + k);
+    b.className   = on ? 'ot-badge' : 'ot-off-badge';
+    b.textContent = on ? 'On' : 'Off';
+    document.getElementById('otab-' + k).classList.toggle('dimmed', !on);
+    document.getElementById(k + '-off-msg').style.display = on ? 'none'  : 'block';
+    document.getElementById(k + '-fields').style.display  = on ? 'block' : 'none';
+  });
+}
+
+function switchOffer(k) {
+  if (!S.offerOn[k]) return;
+  S.activeTab = k;
+  ['intro', 'core', 'up'].forEach(function(x) {
+    document.getElementById('otab-' + x).classList.toggle('active', x === k);
+    document.getElementById('op-'   + x).classList.toggle('active', x === k);
+  });
+}
+
+function calc() {
+  var a     = getAud();
+  var es    = numVal('emailSize', 0);
+  var hasNL = document.getElementById('hasNewsletter').checked;
+  var op    = numVal('emailOpen', 30) / 100;
+  var cl    = numVal('emailClick', 2) / 100;
+  var clicks = hasNL ? Math.round(es * op * cl) : 0;
+  setT('emailClicksCalc', fmtN(clicks));
+  setT('totalClicks', hasNL ? fmtN(clicks) : '—');
+
+  var tA = es, ac = es > 0 ? 1 : 0;
+  S.social.forEach(function(ch) { tA += ch.f; if (ch.f > 0) ac++; });
+  var ex = numVal('existingSize', 0), pod = numVal('podcastSize', 0);
+  tA += ex + pod;
+  if (ex  > 0) ac++;
+  if (pod > 0) ac++;
+  setT('totalAud', fmtN(tA));
+  setT('chCount',  ac);
+
+  var iP      = numVal('introPrice', 97);
+  var cM      = numVal('coreMonthly', 48);
+  var cA      = numVal('coreAnnual', 497);
+  var billing = document.getElementById('coreBilling') ? document.getElementById('coreBilling').value : 'monthly';
+  var cEff    = billing === 'annual' ? cA : billing === 'monthly' ? cM * 12 : (cA + cM * 12) / 2;
+  setT('coreEffective', fmt(cEff));
+
+  var upP  = numVal('upPrice', 1997);
+  var upMR = numVal('upMembers', 0);
+  var iM = 0, coreM = 0;
+
+  AK.forEach(function(k) {
+    var v  = a[k] || 0;
+    var im = Math.round(v * (S.iConv[k] || 0) / 100);
+    var cm = Math.round(v * (S.cConv[k] || 0) / 100);
+    iM    += im;
+    coreM += cm;
+    var ice = document.getElementById('ic-' + k);
+    var cce = document.getElementById('cc-' + k);
+    if (ice) ice.textContent = fmtN(im);
+    if (cce) cce.textContent = fmtN(cm);
+  });
+
+  var cap = numVal('introCap', 0);
+  if (cap > 0) iM = Math.min(iM, cap);
+
+  var iR    = S.offerOn.intro ? iM    * iP   : 0;
+  var cR    = S.offerOn.core  ? coreM * cEff : 0;
+  var uR    = S.offerOn.up    ? upMR  * upP  : 0;
+  var gross = iR + cR + uR;
+
+  var dIM = S.offerOn.intro ? iM    : 0;
+  var dCM = S.offerOn.core  ? coreM : 0;
+  var dUM = S.offerOn.up    ? upMR  : 0;
+
+  setT('introMembers',  fmtN(dIM));
+  setT('introPriceDisp', fmt(iP));
+  setT('introRevDisp',   fmt(iR));
+  setT('coreMembers',   fmtN(dCM));
+  setT('coreEffDisp',    fmt(cEff));
+  setT('coreRevDisp',    fmt(cR));
+  setT('upMembersDisp', fmtN(dUM));
+  setT('upRevDisp',      fmt(uR));
+
+  var mc    = numVal('mightyCost', 0);
+  var txPct = numVal('txFee', 0.5);
+  var tx    = Math.round(gross * txPct / 100);
+  var oth   = S.expenses.reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var tExp  = mc + tx + oth;
+
+  setT('mightyCostDisp', fmt(mc));
+  setT('txFeeDisp',      fmt(tx));
+  setT('otherExpDisp',   fmt(oth));
+  setT('totalExpDisp',   fmt(tExp));
+
+  var net    = gross - tExp;
+
+  var roi    = tExp  > 0 ? net / tExp  : 0;
+  var margin = gross > 0 ? net / gross : 0;
+
+  var host  = strVal('hostName',  'Your Network');
+  var iN    = strVal('introName', 'Intro offer');
+  var cN    = strVal('coreName',  'Core offer');
+  var uN    = strVal('upName',    'Level-up offer');
+  var tM    = dIM + dCM + dUM;
+  var aOff  = Object.keys(S.offerOn).filter(function(k) { return S.offerOn[k]; }).length;
+
+  setT('sumTitle', host + ' — Revenue Projections');
+  setT('sumSub',   fmtN(tM) + ' total members · ' + aOff + ' active offer' + (aOff !== 1 ? 's' : ''));
+  setT('grossRev', fmt(gross));
+  setT('grossSub', fmt(Math.round(gross / 12)) + ' avg per month');
+
+  var rows = '';
+  if (S.offerOn.intro) rows += '<tr><td>' + iN + '</td><td class="num">' + fmtN(dIM) + '</td><td class="num">' + fmt(iP)   + ' one-time</td><td class="num blue">' + fmt(iR) + '</td></tr>';
+  if (S.offerOn.core)  rows += '<tr><td>' + cN + '</td><td class="num">' + fmtN(dCM) + '</td><td class="num">' + fmt(cEff) + '/yr</td><td class="num blue">'       + fmt(cR) + '</td></tr>';
+  if (S.offerOn.up)    rows += '<tr><td>' + uN + '</td><td class="num">' + fmtN(dUM) + '</td><td class="num">' + fmt(upP)  + '/yr</td><td class="num blue">'       + fmt(uR) + '</td></tr>';
+  rows += '<tr class="tot"><td colspan="3">Gross revenue</td><td class="num blue">' + fmt(gross) + '</td></tr>';
+  var tb = document.getElementById('sum-tbody');
+  if (tb) tb.innerHTML = rows;
+
+  setT('pr-gross', fmt(gross));
+  setT('pr-exp',   '−' + fmt(tExp));
+  var ne = document.getElementById('pr-net');
+  if (ne) { ne.textContent = fmt(net); ne.className = 'profit-val ' + (net >= 0 ? 'pos' : 'neg'); }
+  setT('pr-roi',     (roi    * 100).toFixed(0) + '%');
+  setT('pr-margin',  (margin * 100).toFixed(0) + '%');
+  setT('pr-monthly', fmt(Math.round(gross / 12)));
+  setT('sc-lo',   fmt(gross * 0.5));  setT('sc-lo-p', 'net: ' + fmt(Math.round(gross * 0.5) - tExp));
+  setT('sc-mi',   fmt(gross));        setT('sc-mi-p', 'net: ' + fmt(net));
+  setT('sc-hi',   fmt(gross * 1.5));  setT('sc-hi-p', 'net: ' + fmt(Math.round(gross * 1.5) - tExp));
+
+  var ins = '';
+  if (gross === 0) {
+    ins = 'Complete steps 1–3 to see a personalized insight here.';
+  } else if (hasNL && clicks > 0) {
+    ins = 'The active newsletter is the strongest conversion asset here — clicked subscribers convert at 3–6× the rate of a cold list or social following.';
+  } else if (!hasNL && es > 0) {
+    ins = 'There\'s an email list of ' + fmtN(es) + ' but no active newsletter. A short warm-up sequence before launch can significantly lift conversion from this list.';
+  } else if (gross < 50000) {
+    ins = 'At ' + fmt(gross) + ' projected, audience size is the main constraint. An active email list consistently outperforms social-only strategies on Mighty.';
+  } else {
+    ins = fmt(gross) + ' is a strong projection. Retaining core members will matter more than acquisition over time — keeping existing members is worth 3–5× the effort of acquiring new ones.';
+  }
+  setT('sum-insight', ins);
+
+  if (typeof Chart !== 'undefined') {
+    var ctx = document.getElementById('revChart');
+    if (ctx) {
+      if (rChart) rChart.destroy();
+      var lb = [], dt = [], co = [];
+      var colors = { intro: '#B5D4F4', core: '#00D0AD', up: '#185FA5' };
+      var names  = { intro: iN, core: cN, up: uN };
+      var revs   = { intro: iR, core: cR, up: uR };
+      ['intro', 'core', 'up'].forEach(function(k) {
+        if (S.offerOn[k]) { lb.push(names[k]); dt.push(revs[k]); co.push(colors[k]); }
+      });
+      rChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: lb, datasets: [{ data: dt, backgroundColor: co, borderRadius: 4 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: function(v) { return '$' + Math.round(v / 1000) + 'k'; }, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+  }
+}
+
+function addExpense()       { S.expenses.push({ label: '', amount: 0 }); renderExpenses(); }
+function removeExpense(i)   { S.expenses.splice(i, 1); renderExpenses(); calc(); }
+function renderExpenses() {
+  var h = '';
+  S.expenses.forEach(function(e, i) {
+    h += '<div class="exp-row">'
+       + '<input type="text" placeholder="Label (e.g. Team, Ads, Tools)" value="' + e.label + '" onchange="S.expenses[' + i + '].label = this.value;">'
+       + '<input type="number" placeholder="$ amount" value="' + (e.amount || '') + '" onchange="S.expenses[' + i + '].amount = +this.value; calc();">'
+       + '<button class="btn-rm" onclick="removeExpense(' + i + ')">×</button>'
+       + '</div>';
+  });
+  document.getElementById('exp-rows').innerHTML = h;
+}
+
+function exportSummary() {
+  var host  = strVal('hostName',  'Your Network');
+  var iN    = strVal('introName', 'Intro offer');
+  var cN    = strVal('coreName',  'Core offer');
+  var uN    = strVal('upName',    'Level-up offer');
+  var iP    = numVal('introPrice',  97);
+  var cM    = numVal('coreMonthly', 48);
+  var cA    = numVal('coreAnnual', 497);
+  var billing = document.getElementById('coreBilling') ? document.getElementById('coreBilling').value : 'monthly';
+  var cEff  = billing === 'annual' ? cA : billing === 'monthly' ? cM * 12 : (cA + cM * 12) / 2;
+  var upP   = numVal('upPrice',   1997);
+  var upMR  = numVal('upMembers', 0);
+  var a     = getAud();
+  var iM = 0, coreM = 0;
+  AK.forEach(function(k) {
+    var v = a[k] || 0;
+    iM    += Math.round(v * (S.iConv[k] || 0) / 100);
+    coreM += Math.round(v * (S.cConv[k] || 0) / 100);
+  });
+  var cap = numVal('introCap', 0);
+  if (cap > 0) iM = Math.min(iM, cap);
+  var iR    = S.offerOn.intro ? iM    * iP   : 0;
+  var cR    = S.offerOn.core  ? coreM * cEff : 0;
+  var uR    = S.offerOn.up    ? upMR  * upP  : 0;
+  var gross = iR + cR + uR;
+  var mc    = numVal('mightyCost', 0);
+  var txPct = numVal('txFee', 0.5);
+  var tx    = Math.round(gross * txPct / 100);
+  var oth   = S.expenses.reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var tExp  = mc + tx + oth;
+  var net   = gross - tExp;
+  var roi    = tExp  > 0 ? (net / tExp  * 100).toFixed(0) + '%' : '—';
+  var margin = gross > 0 ? (net / gross * 100).toFixed(0) + '%' : '—';
+  var dIM   = S.offerOn.intro ? iM    : 0;
+  var dCM   = S.offerOn.core  ? coreM : 0;
+  var dUM   = S.offerOn.up    ? upMR  : 0;
+  var today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  var oRows = '';
+  if (S.offerOn.intro) oRows += '<tr><td>' + iN + '</td><td>' + fmtN(dIM) + '</td><td>' + fmt(iP)   + ' one-time</td><td>' + fmt(iR) + '</td></tr>';
+  if (S.offerOn.core)  oRows += '<tr><td>' + cN + '</td><td>' + fmtN(dCM) + '</td><td>' + fmt(cEff) + '/yr</td><td>'       + fmt(cR) + '</td></tr>';
+  if (S.offerOn.up)    oRows += '<tr><td>' + uN + '</td><td>' + fmtN(dUM) + '</td><td>' + fmt(upP)  + '/yr</td><td>'       + fmt(uR) + '</td></tr>';
+
+  var eRows = '';
+  if (mc > 0) eRows += '<tr><td>Mighty Pro annual cost</td><td>' + fmt(mc) + '</td></tr>';
+  if (tx > 0) eRows += '<tr><td>Transaction fees (' + txPct + '%)</td><td>' + fmt(tx) + '</td></tr>';
+  S.expenses.forEach(function(e) {
+    if (e.amount > 0) eRows += '<tr><td>' + (e.label || 'Expense') + '</td><td>' + fmt(+e.amount) + '</td></tr>';
+  });
+
+  var css = [
+    '* { box-sizing: border-box; margin: 0; padding: 0; }',
+    '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Inter+Tight:wght@500;600&display=swap");',
+    'body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 32px; max-width: 760px; margin: 0 auto; font-size: 12px; }',
+    '@media print { body { padding: 24px; } @page { margin: .5in; size: letter; } .no-print { display: none !important; } }',
+    '.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #092B2E; }',
+    '.logo { display: block; margin-bottom: 6px; }',
+    '.host-name { font-family: "Inter Tight", sans-serif; font-size: 22px; font-weight: 600; color: #092B2E; }',
+    '.doc-meta { text-align: right; font-size: 11px; color: #565656; line-height: 1.5; }',
+    '.big-num { text-align: center; padding: 14px; background: #f0fdf9; border-radius: 8px; margin-bottom: 16px; }',
+    '.bn-label { font-size: 10px; color: #565656; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }',
+    '.bn-value { font-size: 36px; font-weight: 600; margin-bottom: 2px; }',
+    '.bn-sub { font-size: 11px; color: #565656; }',
+    '.sec { font-size: 9px; font-weight: 600; color: #6b6b6b; text-transform: uppercase; letter-spacing: .07em; margin: 14px 0 6px; }',
+    'table { width: 100%; border-collapse: collapse; font-size: 12px; }',
+    'th { text-align: left; font-weight: 500; color: #565656; padding: 4px 6px; border-bottom: 1px solid #e5e5e5; font-size: 10px; }',
+    'td { padding: 5px 6px; border-bottom: 1px solid #f5f5f5; }',
+    'td:last-child, th:last-child { text-align: right; }',
+    '.tr td { font-weight: 600; border-top: 1px solid #e5e5e5; border-bottom: none; padding-top: 7px; }',
+    '.bl { color: #00D0AD; }',
+    '.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }',
+    '.metric { background: #f7f7f7; border-radius: 6px; padding: 10px; }',
+    '.metric .ml { font-size: 9px; color: #6b6b6b; margin-bottom: 3px; }',
+    '.metric .mv { font-size: 17px; font-weight: 500; }',
+    '.metric.pos .mv { color: #15803d; }',
+    '.scenarios { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }',
+    '.scen { background: #f7f7f7; border-radius: 6px; padding: 10px; text-align: center; }',
+    '.scen.base { background: #f0fdf9; border: 1px solid rgba(0,208,173,.3); }',
+    '.scen .sl { font-size: 9px; color: #6b6b6b; margin-bottom: 4px; }',
+    '.scen .sv { font-size: 14px; font-weight: 500; }',
+    '.scen .sp { font-size: 10px; color: #565656; margin-top: 3px; }',
+    '.footer { margin-top: 16px; padding-top: 10px; border-top: 1px solid #e5e5e5; font-size: 10px; color: #6b6b6b; display: flex; justify-content: space-between; }',
+    '.print-btn { position: fixed; bottom: 24px; right: 24px; background: #00D0AD; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; }'
+  ].join(' ');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<title>' + host + ' \u2014 Revenue Projections</title>'
+    + '<style>' + css + '</style></head><body>'
+    + '<button class="print-btn no-print" onclick="window.print()">Save as PDF</button>'
+    + '<div class="header">'
+    +   '<div>'
+    +     '<svg class="logo" width="80" height="24" viewBox="0 0 269 82" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +       '<path d="M0 62.0305H13.7941V40.1138C13.7941 32.0717 16.7693 29.6856 21.187 29.6856C25.4244 29.6856 27.5882 32.0717 27.5882 37.9928V62.0305H41.4725V40.1138C41.4725 32.0717 44.4477 29.6856 48.7753 29.6856C53.0127 29.6856 55.2665 32.1601 55.2665 38.0812V62.0305H69.1508V35.6067C69.1508 26.6809 66.1757 18.2854 53.7339 18.2854C47.3328 18.2854 42.1937 21.5552 39.8497 26.1507C37.9563 21.6436 33.9894 18.2854 26.2359 18.2854C20.1953 18.2854 15.6874 21.3785 13.7941 25.6204V19.4343H0V62.0305Z" fill="#092B2E"/>'
+    +       '<path d="M81.5569 16.5259C86.5156 16.5259 90.1219 12.8142 90.1219 8.30716C90.1219 3.71171 86.5156 0 81.5569 0C76.5982 0 73.0821 3.71171 73.0821 8.30716C73.0821 12.8142 76.5982 16.5259 81.5569 16.5259ZM74.705 62.0305H88.4089V21.041H74.705V62.0305Z" fill="#092B2E"/>'
+    +       '<path d="M126.892 19.4343V25.5321C124.728 21.1134 119.409 18.2854 113.459 18.2854C100.927 18.2854 92.6321 27.7414 92.6321 40.2905C92.6321 52.8396 100.386 62.0305 113.278 62.0305C118.958 62.0305 124.728 59.3793 126.892 55.1374V60.7933C126.892 68.3935 123.015 71.1331 116.614 71.1331C111.024 71.1331 108.049 69.1005 107.418 65.7422H93.3533C93.5337 70.3377 96.6892 74.9332 101.107 77.5844C105.344 80.0588 110.573 81.0309 116.794 81.0309C123.015 81.0309 128.334 79.9705 132.301 77.2309C137.621 73.6075 140.596 67.5097 140.686 59.2909V19.4343H126.892ZM117.065 51.6024C110.844 51.6024 106.787 46.9186 106.787 40.4673C106.787 34.016 110.844 29.3321 117.065 29.3321C123.646 29.3321 127.523 34.2811 127.523 40.4673C127.523 46.6535 123.646 51.6024 117.065 51.6024Z" fill="#092B2E"/>'
+    +       '<path d="M174.169 18.2854C167.588 18.2854 162.629 20.8482 160.105 25.6204V0.168712H146.311V62.0305H160.105V39.7603C160.105 33.2206 162.99 29.6856 168.489 29.6856C174.079 29.6856 176.153 32.9555 176.153 40.1138V62.0305H190.037V35.6951C190.037 24.1181 184.718 18.2854 174.169 18.2854Z" fill="#092B2E"/>'
+    +       '<path d="M215.465 51.514C212.039 51.514 209.424 50.5419 209.424 44.2674V30.1275H220.243V19.4343H209.424V6.79677H195.63V47.0953C195.63 61.3235 204.556 62.7375 211.047 62.7375C215.998 62.7375 221.473 61.428 224.546 60.4559C224.546 60.4559 222.935 57.4431 222.32 55.8363C221.706 54.2295 220.858 51.2168 220.858 51.2168C219.596 51.3935 216.997 51.514 215.465 51.514Z" fill="#092B2E"/>'
+    +       '<path d="M255.097 19.4343V40.5556C255.097 47.0953 252.302 51.3373 246.712 51.3373C240.942 51.3373 239.049 47.6256 239.049 42.1464V19.4343H225.255V44.179C225.255 54.7839 230.213 62.0305 241.303 62.0305C247.884 62.0305 252.663 59.4677 255.097 54.9606V61.5887C255.097 68.2167 251.761 71.1331 246.712 71.1331C241.483 71.1331 239.41 69.0121 239.139 65.3887H225.255C225.345 69.9842 227.509 73.961 230.664 76.6123C234.271 79.5286 239.319 81.0309 246.712 81.0309C254.015 81.0309 258.793 79.3518 262.67 76.082C266.367 72.8122 268.891 67.5981 268.891 60.7049V19.4343H255.097Z" fill="#092B2E"/>'
+    +     '</svg>'
+    +     '<div class="host-name">' + host + '</div>'
+    +   '</div>'
+    +   '<div class="doc-meta"><div>Revenue Projections</div><div>' + today + '</div></div>'
+    + '</div>'
+    + '<div class="big-num">'
+    +   '<div class="bn-label">Gross revenue</div>'
+    +   '<div class="bn-value">' + fmt(gross) + '</div>'
+    +   '<div class="bn-sub">' + fmt(Math.round(gross / 12)) + ' avg per month \u00b7 ' + (dIM + dCM + dUM).toLocaleString() + ' total members</div>'
+    + '</div>'
+    + '<div class="sec">Revenue by offer</div>'
+    + '<table><thead><tr><th>Offer</th><th>Members</th><th>Price</th><th>Annual total</th></tr></thead>'
+    + '<tbody>' + oRows + '<tr class="tr"><td colspan="3">Gross revenue</td><td class="bl">' + fmt(gross) + '</td></tr></tbody></table>'
+    + '<div class="sec">Profitability</div>'
+    + '<table><thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody>'
+    + eRows
+    + '<tr class="tr"><td>Total expenses</td><td>' + fmt(tExp) + '</td></tr>'
+    + '<tr class="tr"><td>Net profit</td><td class="bl">' + fmt(net) + '</td></tr>'
+    + '</tbody></table>'
+    + '<div class="sec">Key metrics</div>'
+    + '<div class="metrics">'
+    +   '<div class="metric' + (net >= 0 ? ' pos' : '') + '"><div class="ml">Net profit</div><div class="mv">' + fmt(net) + '</div></div>'
+    +   '<div class="metric"><div class="ml">ROI</div><div class="mv">' + roi + '</div></div>'
+    +   '<div class="metric"><div class="ml">Margin</div><div class="mv">' + margin + '</div></div>'
+    + '</div>'
+    + '<div class="sec">Scenarios</div>'
+    + '<div class="scenarios">'
+    +   '<div class="scen"><div class="sl">Conservative (50%)</div><div class="sv">' + fmt(gross * .5) + '</div><div class="sp">net: ' + fmt(Math.round(gross * .5) - tExp) + '</div></div>'
+    +   '<div class="scen base"><div class="sl">Base projection</div><div class="sv">' + fmt(gross) + '</div><div class="sp">net: ' + fmt(net) + '</div></div>'
+    +   '<div class="scen"><div class="sl">Optimistic (150%)</div><div class="sv">' + fmt(gross * 1.5) + '</div><div class="sp">net: ' + fmt(Math.round(gross * 1.5) - tExp) + '</div></div>'
+    + '</div>'
+    + '<div class="footer"><span>Mighty Pro \u00b7 ROI Calculator</span></div>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+buildSocialGrid();
+buildConvRows();
+renderExpenses();
+refreshOfferUI();
+calc();
+
+</script>
+</body>
+</html>
